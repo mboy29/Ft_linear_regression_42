@@ -1,6 +1,6 @@
 # Imports
 # -------
-import sys, pandas, math
+import sys, pandas, math, os, csv
 import matplotlib.pyplot as pyplot
 from tools import *
 
@@ -16,6 +16,8 @@ BLUE = '\033[0;94m'
 PURPLE = '\033[0;95m'
 NONE = '\033[0;37m'
 
+ITERATIONS = 1000
+LEARNING_RATE = 0.5
 
 # Outputs
 # -------
@@ -29,26 +31,108 @@ def purple(str): return f'{PURPLE}{str}{NONE}'
 # Functions
 # ---------
 
-# Load data from csv file
-# -----------------------
-def ft_load() -> pandas.DataFrame:
+def ft_load(path: str = 'data.csv') -> pandas.DataFrame:
+
+    """
+
+        Load data from csv file.
+        Check if data is corrupted, this includes:
+        - Missing or unecessary column(s) (must be 2)
+        - Wrong column(s) (not 'price' or 'km')
+        - Not enought data to train program
+        - Nan or negative value(s)
+        - Wrong data type (must be int or float)
+        - Permission denied
+        - File not found
+        - Is a directory
+
+        Args:
+            path (str): Path to csv file (default: 'data.csv').
+    
+    """
 
     try:
-        path: str = 'data.csv'
+        print(f'1. Loading data from { path }...', end='\r')
         data: pandas.DataFrame = pandas.read_csv(path)
-
         if len(data.columns) > 2: raise Exception('Data file is corrupted, unecessary column(s).')
         elif len(data.columns) < 2: raise Exception('Data file is corrupted, missing column(s).')
         elif 'price' not in data or 'km' not in data: raise Exception('Data file is corrupted, wrong column(s).')
         elif len(data['price']) < 2 or len(data['km']) < 2: raise Exception('Data file is corrupted, not enought data to train program.')
         elif any(math.isnan(data) for data in data['price'].tolist()) or any(math.isnan(data) for data in data['km'].tolist()): raise Exception('Data file is corrupted, Nan values.')
         elif any(int(price) < 0 for price in data['price'].tolist()) or any(int(price) < 0 for price in data['km'].tolist()) : raise Exception('Data file is corrupted, negative value(s).')
+        print(green(f'{ ERASE_LINE }1. Loading data from { path }... Done ✅'))
         return data
 
     except TypeError: raise Exception("Data file is corrupted, wrong data type (must be int or float).")
     except PermissionError: raise Exception("Data file is corrupted, permission denied.")
     except FileNotFoundError: raise Exception("Data file not found, please download it from the 42 intranet.")
     except IsADirectoryError: raise Exception(f"Data file is corrupted, '{ path }' is a directory.")
+
+
+def ft_normalize(data: list) -> list:
+
+    """
+        Normalizes a set of data stored in a list (between 0 and 1).
+        Normalizing a set of data means to scale the values to a range of [0, 1].
+
+        Args:
+            data (list): List of data to normalize.
+    """
+
+    normalized_data: list = []
+
+    print(green('2. Normalizing data...'), end='\r')
+    for idx in range(len(data)):
+        normalized_data.append((data[idx] - min(data)) / (max(data) - min(data)))
+    print(green(f'{ ERASE_LINE }2. Normalizing data... Done ✅'))
+    return normalized_data
+
+
+def ft_save(theta0: float, theta1: float) -> None:
+
+    """
+        Saves the final values of theta0 and theta1 in a csv file.
+        If the file already exists, delete it and create a new one.
+
+        Args:
+            theta0 (float): Final value of theta0.
+            theta1 (float): Final value of theta1.
+    """
+
+    path: str = 'thetas.csv'
+    if os.path.exists(path):
+        os.remove(path)
+    with open(path, 'w') as file:
+        writer = csv.writer(file)
+        writer.writerow(['theta0', 'theta1'])
+        writer.writerow([theta0, theta1])
+    
+
+def ft_train(x_km: list, y_price: list) -> None:
+    
+    """
+    Trains a linear regression model using the provided data points by iterative
+    gradient descent to update theta0 and theta1 based on the training data.
+    
+    Args:
+        x_km (list): List of mileage values (independent variable).
+        y_price (list): List of corresponding price values (dependent variable).
+    """
+
+    theta0: float = 0.0
+    theta1: float = 0.0
+
+    print(green('3. Training model...'), end='\r')
+    for idx in range(0, ITERATIONS):
+        tmp0: float = 0.0
+        tmp1: float = 0.0
+        for km, price in zip(x_km, y_price):
+            tmp0 += (theta0 + theta1 * km) - price
+            tmp1 += ((theta0 + theta1 * km) - price) * km
+        theta0 -= LEARNING_RATE * (1 / len(x_km)) * tmp0
+        theta1 -= LEARNING_RATE * (1 / len(x_km)) * tmp1
+    print(f'{ ERASE_LINE }3. Training model... Done ✅')
+    ft_save(theta0, theta1)
 
 
 def ft_plot(x_km: list, y_price: list) -> None:
@@ -68,11 +152,7 @@ def main(*args) -> int:
     data: pandas.DataFrame = ft_load()
     x_km: list = ft_normalize(data['km'].tolist())
     y_price: list = ft_normalize(data['price'].tolist())
-    
-
-    print(purple(f'Data: { data }'))
-    print(purple(x_km))
-    print(blue(y_price))
+    thetas: tuple(float, float) = ft_train(x_km, y_price)
 
     ft_plot(x_km, y_price)
 
