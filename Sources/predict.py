@@ -1,12 +1,14 @@
 # Imports
 # -------
+
+from train import ft_load
 from tools import *
 
 
 # Functions
 # ---------
 
-def ft_thetas() -> tuple :
+def ft_thetas(path: str = PATH_THETAS) -> tuple :
 
     """
     Load thetas from csv file.
@@ -24,7 +26,7 @@ def ft_thetas() -> tuple :
     will be applied to prediction and the user will be warned.
 
     Args:
-        None
+        path (str): Path to csv file (default: 'data.csv').
     
     Returns:
         thetas (tuple): Tuple of thetas loaded from csv file.
@@ -33,24 +35,25 @@ def ft_thetas() -> tuple :
     try:
 
         print(message('1. Fetching thetas from thetas.csv...'), end='\r')        
-        data: pandas.DataFrame = pandas.read_csv(PATH_THETAS)
+        data: pandas.DataFrame = pandas.read_csv(path)
         if len(data.columns) > 2: raise Exception('Thetas file is corrupted, unecessary column(s).')
         elif len(data.columns) < 2: raise Exception('Thetas file is corrupted, missing column(s).')
         elif 'theta0' not in data or 'theta1' not in data: raise Exception('Thetas file is corrupted, wrong column(s).')
         elif len(data['theta0']) != 1 or len(data['theta1']) != 1: raise Exception('Thetas file is corrupted, should only contain one value for each column.')
         elif any(math.isnan(data) for data in data['theta0'].tolist()) or any(math.isnan(data) for data in data['theta1'].tolist()): raise Exception('Thetas file is corrupted, Nan values.')
         print(message('1. Fetching thetas from thetas.csv... Done √'))
-        return (data['theta0'], data['theta1'])
+        return (data['theta0'].item(), data['theta1'].item())
     
     except TypeError: raise Exception("Data file is corrupted, wrong data type (must be int or float).")
     except PermissionError: raise Exception("Data file is corrupted, permission denied.")
     except IsADirectoryError: raise Exception(f"Data file is corrupted, '{ path }' is a directory.")
     except FileNotFoundError:
-        print(error(f'[ WARNING ]: { PATH_THETAS } not found, default values 0.0 will be applied to prediction.\nTrain beforehand to avoid this warning (python3 train.py).'))
+        print(error(f'[ WARNING ]: { path } not found, default values 0.0 will be applied to prediction.\nTrain beforehand to avoid this warning (python3 train.py).'))
         return (0.0, 0.0)
 
+# ----------
 
-def ft_meliage() -> float:
+def ft_kilometers() -> float:
 
     """
     Asks the user for a mileage and returns it.
@@ -63,33 +66,63 @@ def ft_meliage() -> float:
     """
 
     try:
-        mileage: float = float(input(message('2. Enter a mileage (in km): ')))
-        if mileage < 0: raise Exception('Mileage cannot be negative.')
-        return mileage
+        km: float = float(input(message('2. Enter a mileage (in km): ')))
+        if km < 0: raise Exception('Mileage cannot be negative.')
+        return km
     
     except (ValueError, KeyboardInterrupt): raise Exception('Mileage must be a number.')
     except EOFError: raise Exception('Mileage must be a number.')
 
+# ----------
 
-def     ft_predict(mileage: float, thetas: tuple) -> float:
-    price = thetas[1] * normalizeElem(mileages, mileage) + thetas[0]
+def ft_predict(thetas: tuple, km: float) -> None:
+    
+        """
+        Predicts the price of a car with a given mileage.
+    
+        Args:
+            thetas (tuple): Tuple of thetas loaded from csv file.
+            mileage (float): Mileage entered by the user.
+        
+        Returns:
+            price (float): Predicted price of the car.
+        """
+    
+        price: float = 0.0
+        data: pandas.DataFrame = ft_load()
+        x_km: list = data['km'].tolist()
+        y_price: list = data['price'].tolist()
+
+        print(message(f'3. Predicting price for a car with a mileage of { km } km...'), end='\r')
+        price = ft_denormalize_value(y_price, (thetas[0] + (thetas[1] * ft_normalize_value(x_km, km))))
+        print(message(f'3. Predicting price for a car with a mileage of { km } km... Done √'))
+        print(message(f"\nFinal price: { round(price, 2) }"))
 
 
 # Main function
 # -------------
 
-def ft_main(*args) -> None:
+def ft_main(args: list) -> None:
 
     """
         Main function.
 
         Args:
-            args (list): List of arguments passed to the program.
+            -bonus (bool): Optional argument to enable bonus mode (default: False).
     """
 
-    thetas: tuple = ft_thetas()
-    mileage: float = ft_meliage()
+    global BONUS
+    km: float = None
+    thetas: tuple = None
 
+    if '-bonus' in args:
+        BONUS = True
+        args.remove('-bonus')
+    if len(args) > 0:
+        raise Exception("Please provide path to CSV only, or no arguments at all to use default path 'data.csv'.")
+    thetas = ft_thetas()
+    km = ft_kilometers()
+    ft_predict(thetas, km)
 
 
 # Main
@@ -102,7 +135,7 @@ if __name__ == '__main__':
         print(header(f'|_   |    |   | |\ | |_ |_| |_|   |_| |_ | _ |_| |_ |_  |_  | | | |\ |'))
         print(header(f'|    |    |__ | | \| |_ | | | \   | \ |_ |_| | \ |_ __| __| | |_| | \|\n'))
         print(header(f'----------------------------- PREDICTION -----------------------------\n'))
-        ft_main(*sys.argv[1:])
+        ft_main(sys.argv[1:])
         sys.exit(0)
     
     except (KeyboardInterrupt, EOFError): print(error('[ WARNING ]: Program interrupted by user.'))
