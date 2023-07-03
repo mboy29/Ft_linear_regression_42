@@ -48,7 +48,7 @@ def ft_thetas(path: str = PATH_THETAS) -> tuple :
     except PermissionError: raise Exception("Data file is corrupted, permission denied.")
     except IsADirectoryError: raise Exception(f"Data file is corrupted, '{ path }' is a directory.")
     except FileNotFoundError:
-        print(error(f'[ WARNING ]: { path } not found, default values 0.0 will be applied to prediction.\nTrain beforehand to avoid this warning (python3 train.py).'))
+        print(error(f'[ WARNING ]: { path } not found, default values 0.0 will be applied to prediction.\nTrain beforehand to avoid this warning (python3 train.py).\n'))
         return (0.0, 0.0)
 
 # ----------
