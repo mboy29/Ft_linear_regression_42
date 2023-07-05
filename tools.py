@@ -11,8 +11,8 @@ from sty import fg
 BONUS = False
 ITERATIONS = 500
 LEARNING_RATE = 0.5
-PATH_DATA = '../DataSets/data.csv'
-PATH_THETAS = '../DataSets/thetas.csv'
+PATH_DATA = './DataSets/data.csv'
+PATH_THETAS = './DataSets/thetas.csv'
 
 
 # Colored output

@@ -7,7 +7,7 @@ from tools import *
 # Functions
 # ---------
 
-def ft_load(path: str = PATH_DATA) -> pandas.DataFrame:
+def ft_load(path: str = PATH_DATA, output: bool = True) -> pandas.DataFrame:
 
     """
     Load data from csv file.
@@ -30,7 +30,7 @@ def ft_load(path: str = PATH_DATA) -> pandas.DataFrame:
 
     try:
 
-        print(message(f'1. Loading data from { path }...'), end='\r')
+        if output: print(message(f'1. Loading data from { path }...'), end='\r')
         data: pandas.DataFrame = pandas.read_csv(path)
         if len(data.columns) > 2: raise Exception(f"Data file '{ path }' is corrupted, unecessary column(s).")
         elif len(data.columns) < 2: raise Exception(f"Data file '{ path }' is corrupted, missing column(s).")
@@ -39,7 +39,7 @@ def ft_load(path: str = PATH_DATA) -> pandas.DataFrame:
         elif any(math.isnan(data) for data in data['price'].tolist()) or any(math.isnan(data) for data in data['km'].tolist()): raise Exception(f"Data file '{ path }' is corrupted, Nan values.")
         elif any(int(price) < 0 for price in data['price'].tolist()) or any(int(price) < 0 for price in data['km'].tolist()) : raise Exception(f"Data file '{ path }' is corrupted, negative value(s).")
         elif path.endswith('.csv') == False: raise Exception(f"Data file '{ path }' is corrupted, wrong file extension (must be .csv).")
-        print(message(f'1. Loading data from { path }... Done √'))
+        if output: print(message(f'1. Loading data from { path }... Done √'))
         return data
 
     except TypeError: raise Exception(f"Data file '{ path }' is corrupted, wrong data type (must be int or float).")
@@ -49,7 +49,7 @@ def ft_load(path: str = PATH_DATA) -> pandas.DataFrame:
 
 # ----------
 
-def ft_save(thetas: list, path: str = PATH_THETAS) -> None:
+def ft_save(thetas: list, path: str = PATH_THETAS, output: bool = True) -> None:
 
     """
     Saves the final values of theta0 and theta1 in a csv file.
@@ -64,14 +64,14 @@ def ft_save(thetas: list, path: str = PATH_THETAS) -> None:
         None
     """
 
-    print(message('3. Saving thetas in thetas.csv...'), end='\r')
+    if output: print(message('3. Saving thetas in thetas.csv...'), end='\r')
     if os.path.exists(path):
         os.remove(path)
     with open(path, 'w') as file:
         writer = csv.writer(file)
         writer.writerow(['theta0', 'theta1'])
         writer.writerow([thetas[0], thetas[1]])
-    print(message('3. Saving thetas in thetas.csv... Done √'))
+    if output: print(message('3. Saving thetas in thetas.csv... Done √'))
     
 # ----------
 
@@ -131,7 +131,7 @@ def ft_adjust(x_km: list, y_price: list, thetas: list, tmp: list, loss: list) ->
 
 # ----------
 
-def ft_train(x_km: list, y_price: list) -> tuple:
+def ft_train(x_km: list, y_price: list, output: bool = True) -> tuple:
     
     """
     Trains a linear regression model using the provided data points by iterative
@@ -148,7 +148,7 @@ def ft_train(x_km: list, y_price: list) -> tuple:
     thetas: list = [0.0, 0.0]
     loss: list = []
 
-    print(message('2. Training model...'), end='\r')
+    if output: print(message('2. Training model...'), end='\r')
     for _ in range(ITERATIONS):
         tmp: list = [0.0, 0.0]
         prediction: float = 0.0
@@ -160,12 +160,12 @@ def ft_train(x_km: list, y_price: list) -> tuple:
         thetas[1] -= tmp[1] / len(y_price) * LEARNING_RATE
         loss.append(ft_loss(thetas, x_km, y_price))
         thetas = ft_adjust(x_km, y_price, thetas, tmp, loss)
-    print(message('2. Training model... Done √'))
+    if output: print(message('2. Training model... Done √'))
     return thetas
 
 # ----------
 
-def ft_plot(x_km: list, y_price: list, thetas: list) -> None:
+def ft_plot(x_km: list, y_price: list, thetas: list, output: bool = True) -> None:
 
     """
     Plots the data points and the linear regression model.
@@ -181,6 +181,7 @@ def ft_plot(x_km: list, y_price: list, thetas: list) -> None:
     y_plot: list = []
     x_plot: list = [float(min(x_km)), float(max(x_km))]
 
+    if output: print(message('4. Plotting data points and linear regression model...'), end='\r')
     for elem in x_plot:
         elem = thetas[1] * ft_normalize_value(x_km, elem) + thetas[0]
         y_plot.append(ft_denormalize_value(y_price, elem))
@@ -189,6 +190,8 @@ def ft_plot(x_km: list, y_price: list, thetas: list) -> None:
     pyplot.plot(x_plot, y_plot, color=(248 / 255, 173 / 255, 157 / 255))
     pyplot.xlabel('Kilometers', fontdict={'family': 'arial', 'size': 10})
     pyplot.ylabel('Prices', fontdict={'family': 'arial', 'size': 10})
+    pyplot.title('Linear regression model', fontdict={'family': 'arial', 'size': 12})
+    if output: print(message('4. Plotting data points and linear regression model... Done √'))
     pyplot.show()
 
 
