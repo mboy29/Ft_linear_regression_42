@@ -77,14 +77,14 @@ def ft_kilometers() -> float:
 
 # ----------
 
-def ft_predict(thetas: tuple, km: float, output: bool = True) -> float:
+def ft_predict(thetas: list, km: float, output: bool = True) -> float:
     
         """
         Predicts the price of a car with a given mileage and 
         outputs the result to the user.
     
         Args:
-            thetas (tuple): Tuple of thetas loaded from csv file.
+            thetas (list): List containing thetas loaded from csv file.
             mileage (float): Mileage entered by the user.
             output (bool): Print output messages (default: True).
         
@@ -105,7 +105,7 @@ def ft_predict(thetas: tuple, km: float, output: bool = True) -> float:
 
 # ----------
 
-def ft_precision(thetas: tuple) -> float:
+def ft_precision(thetas: list) -> float:
     
     """
     Calculates the precision of the program and outputs
@@ -114,7 +114,7 @@ def ft_precision(thetas: tuple) -> float:
     the predicted price and the actual price.
 
     Args:
-        thetas (tuple): Tuple of thetas loaded from csv file.
+        thetas (list): List of thetas loaded from csv file.
 
     Returns:
         precision (float): Precision of the program.
@@ -158,9 +158,9 @@ def ft_main(args: list) -> None:
     if '-bonus' in args:
         BONUS = True
         args.remove('-bonus')
-    if len(args) > 0:
+    if len(args) > 1:
         raise Exception("Please provide path to CSV only, or no arguments at all to use default path 'data.csv'.")
-    thetas = ft_thetas()
+    thetas = ft_thetas() if len(args) == 0 else ft_thetas(args[0])
     km = ft_kilometers()
     price = ft_predict(thetas, km)
     if BONUS: precision = ft_precision(thetas)

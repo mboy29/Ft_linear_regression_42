@@ -141,6 +141,7 @@ def ft_train(x_km: list, y_price: list, output: bool = True) -> dict:
     Args:
         x_km (list): List of mileage values (independent variable).
         y_price (list): List of corresponding price values (dependent variable).
+        output (bool): Print output messages (default: True).
     
     Returns:
         histories (dict): Dictionary containing the history of theta0, theta1 and loss.
@@ -226,8 +227,9 @@ def ft_main(args: list) -> None:
         Main function.
 
         Args:
-            path (str): Optional argument to specify path to csv file (default: 'data.csv').
-            -bonus (bool): Optional argument to enable bonus mode (default: False).
+            args (list): List of arguments that can be either:
+                path (str): Optional argument to specify path to csv file (default: 'data.csv').
+                -bonus (bool): Optional argument to enable bonus mode (default: False).
         
         Returns:
             None
