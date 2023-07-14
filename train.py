@@ -132,7 +132,7 @@ def ft_adjust(x_km: list, y_price: list, thetas: list, tmp: list, loss: list) ->
 
 # ----------
 
-def ft_train(x_km: list, y_price: list, output: bool = True) -> list:
+def ft_train(x_km: list, y_price: list, output: bool = True) -> dict:
     
     """
     Trains a linear regression model using the provided data points by iterative
@@ -143,11 +143,12 @@ def ft_train(x_km: list, y_price: list, output: bool = True) -> list:
         y_price (list): List of corresponding price values (dependent variable).
     
     Returns:
-        thetas (list): List containing theta0 and theta1.
+        histories (dict): Dictionary containing the history of theta0, theta1 and loss.
     """
 
     thetas: list = [0.0, 0.0]
     loss: list = []
+    histories: dict = {'theta0': [], 'theta1': [], 'loss': []}
 
     if output: print(message('2. Training model...'), end='\r')
     for _ in range(ITERATIONS):
@@ -159,14 +160,16 @@ def ft_train(x_km: list, y_price: list, output: bool = True) -> list:
             tmp[1] += (prediction - price) * km
         thetas[0] -= tmp[0] / len(x_km) * LEARNING_RATE
         thetas[1] -= tmp[1] / len(y_price) * LEARNING_RATE
-        loss.append(ft_loss(thetas, x_km, y_price))
+        histories['theta0'].append(thetas[0])
+        histories['theta1'].append(thetas[1])
+        histories['loss'].append(ft_loss(thetas, x_km, y_price))
         thetas = ft_adjust(x_km, y_price, thetas, tmp, loss)
     if output: print(message('2. Training model... Done √'))
-    return thetas
+    return histories
 
 # ----------
 
-def ft_plot(x_km: list, y_price: list, thetas: list, output: bool = True) -> None:
+def ft_plot(x_km: list, y_price: list, thetas: list, histories: dict, output: bool = True) -> None:
 
     """
     Plots the data points and the linear regression model.
@@ -175,6 +178,7 @@ def ft_plot(x_km: list, y_price: list, thetas: list, output: bool = True) -> Non
         x_km (list): List of mileage values (independent variable).
         y_price (list): List of corresponding price values (dependent variable).
         thetas (list): List containing theta0 and theta1.
+        histories (dict): Dictionary containing the history of theta0, theta1 and loss.
         output (bool): Print output messages (default: True).
     
     Returns:
@@ -188,12 +192,27 @@ def ft_plot(x_km: list, y_price: list, thetas: list, output: bool = True) -> Non
     for elem in x_plot:
         elem = thetas[1] * ft_normalize_value(x_km, elem) + thetas[0]
         y_plot.append(ft_denormalize_value(y_price, elem))
-    pyplot.figure('Linear regression model')
-    pyplot.plot(x_km, y_price, color=(240 / 255, 128 / 255, 128 / 255), marker='o', linestyle='None')
-    pyplot.plot(x_plot, y_plot, color=(248 / 255, 173 / 255, 157 / 255))
-    pyplot.xlabel('Kilometers', fontdict={'family': 'arial', 'size': 10})
-    pyplot.ylabel('Prices', fontdict={'family': 'arial', 'size': 10})
-    pyplot.title('Linear regression model', fontdict={'family': 'arial', 'size': 12})
+    fig, axes = pyplot.subplots(nrows=2, ncols=2, figsize=(10, 8))
+    fig.canvas.manager.set_window_title("MBOY'S LINEAR REGRESSION") 
+    axes[0, 0].plot(x_km, y_price, color=(240 / 255, 128 / 255, 128 / 255), marker='o', linestyle='None')
+    axes[0, 0].plot(x_plot, y_plot, color=(248 / 255, 173 / 255, 157 / 255))
+    axes[0, 0].set_xlabel('Kilometers', fontdict={'family': 'arial', 'size': 10})
+    axes[0, 0].set_ylabel('Prices', fontdict={'family': 'arial', 'size': 10})
+    axes[0, 0].set_title('Linear regression model', fontdict={'family': 'arial', 'size': 12})
+    axes[0, 1].plot(range(ITERATIONS), histories['loss'], color=(240 / 255, 128 / 255, 128 / 255))
+    axes[0, 1].set_xlabel('Iterations', fontdict={'family': 'arial', 'size': 10})
+    axes[0, 1].set_ylabel('Loss', fontdict={'family': 'arial', 'size': 10})
+    axes[0, 1].set_title('Loss Evolution', fontdict={'family': 'arial', 'size': 12})
+    axes[1, 0].plot(range(ITERATIONS), histories['theta0'], color=(240 / 255, 128 / 255, 128 / 255))
+    axes[1, 0].set_xlabel('Iterations', fontdict={'family': 'arial', 'size': 10})
+    axes[1, 0].set_ylabel('Theta0', fontdict={'family': 'arial', 'size': 10})
+    axes[1, 0].set_title('Theta0 Evolution', fontdict={'family': 'arial', 'size': 12})
+    axes[1, 1].plot(range(ITERATIONS), histories['theta1'], color=(240 / 255, 128 / 255, 128 / 255))
+    axes[1, 1].set_xlabel('Iterations', fontdict={'family': 'arial', 'size': 10})
+    axes[1, 1].set_ylabel('Theta1', fontdict={'family': 'arial', 'size': 10})
+    axes[1, 1].set_title('Theta1 Evolution', fontdict={'family': 'arial', 'size': 12})
+    pyplot.subplots_adjust(wspace=0.5, hspace=0.5)
+    fig.tight_layout(pad=3.0)
     if output: print(message('4. Plotting data points and linear regression model... Done √'))
     pyplot.show()
 
@@ -218,6 +237,7 @@ def ft_main(args: list) -> None:
     x_km: list = None
     y_price: list = None
     thetas: tuple = None
+    histories: dict = None
     data: pandas.DataFrame = None
 
     if '-bonus' in args:
@@ -228,12 +248,13 @@ def ft_main(args: list) -> None:
     data = ft_load() if len(args) == 0 else ft_load(args[0])
     x_km = data['km'].tolist()
     y_price = data['price'].tolist()
-    thetas = ft_train(ft_normalize_list(x_km), ft_normalize_list(y_price))
+    histories = ft_train(ft_normalize_list(x_km), ft_normalize_list(y_price))
+    thetas = histories['theta0'][-1], histories['theta1'][-1]
     ft_save(thetas)
     print(message('\nFinal thetas value :'))
     print(message(f'   - Theta0: { thetas[0] }'))
     print(message(f'   - Theta1: { thetas[1] }'))
-    if BONUS: ft_plot(x_km, y_price, thetas)
+    if BONUS: ft_plot(x_km, y_price, thetas, histories)
 
 
 # Main
