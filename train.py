@@ -23,6 +23,7 @@ def ft_load(path: str = PATH_DATA, output: bool = True) -> pandas.DataFrame:
 
     Args:
         path (str): Path to csv file (default: 'data.csv').
+        output (bool): Print output messages (default: True).
 
     Returns:
         data (pandas.DataFrame): Data loaded from csv file.
@@ -56,9 +57,9 @@ def ft_save(thetas: list, path: str = PATH_THETAS, output: bool = True) -> None:
     If the file already exists, delete it and create a new one.
 
     Args:
-        theta0 (float): Final value of theta0.
-        theta1 (float): Final value of theta1.
+        thetas (list): List of theta0 and theta1.
         path (str): Path to csv file (default: 'thetas.csv').
+        output (bool): Print output messages (default: True).
     
     Returns:
         None
@@ -75,7 +76,7 @@ def ft_save(thetas: list, path: str = PATH_THETAS, output: bool = True) -> None:
     
 # ----------
 
-def ft_loss(thetas: tuple, x_km: list, y_price: list) -> float:
+def ft_loss(thetas: list, x_km: list, y_price: list) -> float:
 
     """
     Computes the loss function of the linear regression model,
@@ -84,7 +85,7 @@ def ft_loss(thetas: tuple, x_km: list, y_price: list) -> float:
     The loss function is the mean squared error of the model.
 
     Args:
-        thetas (tuple): Tuple of theta0 and theta1.
+        thetas (list): List containing theta0 and theta1.
         x_km (list): List of mileage values (independent variable).
         y_price (list): List of corresponding price values (dependent variable).
     
@@ -131,7 +132,7 @@ def ft_adjust(x_km: list, y_price: list, thetas: list, tmp: list, loss: list) ->
 
 # ----------
 
-def ft_train(x_km: list, y_price: list, output: bool = True) -> tuple:
+def ft_train(x_km: list, y_price: list, output: bool = True) -> list:
     
     """
     Trains a linear regression model using the provided data points by iterative
@@ -142,7 +143,7 @@ def ft_train(x_km: list, y_price: list, output: bool = True) -> tuple:
         y_price (list): List of corresponding price values (dependent variable).
     
     Returns:
-        (theta0, theta1) (tuple): Final values of theta0 and theta1.
+        thetas (list): List containing theta0 and theta1.
     """
 
     thetas: list = [0.0, 0.0]
@@ -173,6 +174,8 @@ def ft_plot(x_km: list, y_price: list, thetas: list, output: bool = True) -> Non
     Args:
         x_km (list): List of mileage values (independent variable).
         y_price (list): List of corresponding price values (dependent variable).
+        thetas (list): List containing theta0 and theta1.
+        output (bool): Print output messages (default: True).
     
     Returns:
         None
@@ -181,7 +184,7 @@ def ft_plot(x_km: list, y_price: list, thetas: list, output: bool = True) -> Non
     y_plot: list = []
     x_plot: list = [float(min(x_km)), float(max(x_km))]
 
-    if output: print(message('4. Plotting data points and linear regression model...'), end='\r')
+    if output: print(message('\n4. Plotting data points and linear regression model...'), end='\r')
     for elem in x_plot:
         elem = thetas[1] * ft_normalize_value(x_km, elem) + thetas[0]
         y_plot.append(ft_denormalize_value(y_price, elem))

@@ -8,7 +8,7 @@ from tools import *
 # Functions
 # ---------
 
-def ft_thetas(path: str = PATH_THETAS, output: bool = True) -> tuple :
+def ft_thetas(path: str = PATH_THETAS, output: bool = True) -> list :
 
     """
     Load thetas from csv file.
@@ -27,9 +27,10 @@ def ft_thetas(path: str = PATH_THETAS, output: bool = True) -> tuple :
 
     Args:
         path (str): Path to csv file (default: 'data.csv').
+        output (bool): Print output messages (default: True).
     
     Returns:
-        thetas (tuple): Tuple of thetas loaded from csv file.
+        thetas (list): List containing theta0 and theta1.
     """
 
     try:
@@ -48,8 +49,9 @@ def ft_thetas(path: str = PATH_THETAS, output: bool = True) -> tuple :
     except PermissionError: raise Exception("Data file is corrupted, permission denied.")
     except IsADirectoryError: raise Exception(f"Data file is corrupted, '{ path }' is a directory.")
     except FileNotFoundError:
-        print(error(f'[ WARNING ]: { path } not found, default values 0.0 will be applied to prediction.\nTrain beforehand to avoid this warning (python3 train.py).\n'))
-        return (0.0, 0.0)
+        if output: print(message('1. Fetching thetas from thetas.csv... ⤫'), end='\r')        
+        print(error(f'\n\n[ WARNING ]: { path } not found, default values 0.0 will be applied to prediction.\nTrain beforehand to avoid this warning (python3 train.py).\n'))
+        return (-1.0, -1.0)
 
 # ----------
 
@@ -75,7 +77,7 @@ def ft_kilometers() -> float:
 
 # ----------
 
-def ft_predict(thetas: tuple, km: float, output: bool = True) -> None:
+def ft_predict(thetas: tuple, km: float, output: bool = True) -> float:
     
         """
         Predicts the price of a car with a given mileage and 
@@ -84,6 +86,7 @@ def ft_predict(thetas: tuple, km: float, output: bool = True) -> None:
         Args:
             thetas (tuple): Tuple of thetas loaded from csv file.
             mileage (float): Mileage entered by the user.
+            output (bool): Print output messages (default: True).
         
         Returns:
             price (float): Predicted price of the car.
@@ -95,7 +98,8 @@ def ft_predict(thetas: tuple, km: float, output: bool = True) -> None:
         y_price: list = data['price'].tolist()
 
         if output: print(message(f'3. Predicting price for a car with a mileage of { km } km...'), end='\r')
-        price = ft_denormalize_value(y_price, (thetas[0] + (thetas[1] * ft_normalize_value(x_km, km))))
+        if thetas[0] == -1.0 or thetas[1] == -1.0: price = 0.0
+        else: price = ft_denormalize_value(y_price, (thetas[0] + (thetas[1] * ft_normalize_value(x_km, km))))
         if output: print(message(f'3. Predicting price for a car with a mileage of { km } km... Done √'))
         return price
 
@@ -123,9 +127,12 @@ def ft_precision(thetas: tuple) -> float:
     y_price: list = data['price'].tolist()
 
     print(message(f'4. Calculating precision...'), end='\r')
-    for km, _ in zip(x_km, y_price):
-        prices.append(ft_denormalize_value(y_price, (thetas[0] + (thetas[1] * ft_normalize_value(x_km, km)))))
-    precision = sum([abs(price - prices[index]) for index, price in enumerate(y_price)]) / len(y_price)
+    if thetas[0] == -1.0 or thetas[1] == -1.0: precision = 0.0
+    else:
+        for km, _ in zip(x_km, y_price):
+            prices.append(ft_denormalize_value(y_price, (thetas[0] + (thetas[1] * ft_normalize_value(x_km, km)))))
+        precision = sum([abs(price - prices[index]) for index, price in enumerate(y_price)]) / len(y_price)
+    
     print(message(f'4. Calculating precision... Done √'))
     return precision
 
