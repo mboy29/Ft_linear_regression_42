@@ -246,7 +246,7 @@ def ft_main(args: list) -> None:
         BONUS = True
         args.remove('-bonus')
     if len(args) > 1:
-        raise Exception("Please provide path to CSV only, or no arguments at all to use default path 'data.csv'.")
+        raise Exception("Please provide path to CSV or/and -bonus flag only, or no arguments at all to use default path 'data.csv'.")
     data = ft_load() if len(args) == 0 else ft_load(args[0])
     x_km = data['km'].tolist()
     y_price = data['price'].tolist()

@@ -159,7 +159,7 @@ def ft_main(args: list) -> None:
         BONUS = True
         args.remove('-bonus')
     if len(args) > 1:
-        raise Exception("Please provide path to CSV only, or no arguments at all to use default path 'data.csv'.")
+        raise Exception("Please provide path to CSV or/and -bonus flag only, or no arguments at all to use default path 'thetas.csv'.")
     thetas = ft_thetas() if len(args) == 0 else ft_thetas(args[0])
     km = ft_kilometers()
     price = ft_predict(thetas, km)
