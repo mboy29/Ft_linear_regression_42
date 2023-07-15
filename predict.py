@@ -51,7 +51,7 @@ def ft_thetas(path: str = PATH_THETAS, output: bool = True) -> list :
     except FileNotFoundError:
         if output: print(message('1. Fetching thetas from thetas.csv... ⤫'), end='\r')        
         print(error(f'\n\n[ WARNING ]: { path } not found, default values 0.0 will be applied to prediction.\nTrain beforehand to avoid this warning (python3 train.py).\n'))
-        return (-1.0, -1.0)
+        return (None, None)
 
 # ----------
 
@@ -98,8 +98,9 @@ def ft_predict(thetas: list, km: float, output: bool = True) -> float:
         y_price: list = data['price'].tolist()
 
         if output: print(message(f'3. Predicting price for a car with a mileage of { km } km...'), end='\r')
-        if thetas[0] == -1.0 or thetas[1] == -1.0: price = 0.0
+        if thetas[0] == None or thetas[1] == None: price = 0.0
         else: price = ft_denormalize_value(y_price, (thetas[0] + (thetas[1] * ft_normalize_value(x_km, km))))
+        if price < 0: price = 0.0
         if output: print(message(f'3. Predicting price for a car with a mileage of { km } km... Done √'))
         return price
 
