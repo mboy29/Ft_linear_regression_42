@@ -3,7 +3,7 @@
 Final grade : 125 %
 
 Introductory project to AI and Machine Learning :
-    This project aims at creating a program that predicts the price of a car by using a linear function train with a gradient descent algorithm.
+This project aims at creating a program that predicts the price of a car by using a linear function train with a gradient descent algorithm.
 
 Usage :
 1. Compile setup.sh to download all the necessary packages to execute the program
