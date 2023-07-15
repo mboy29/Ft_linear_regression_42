@@ -2,8 +2,7 @@
 
 Final grade : 125 %
 
-Introductory project to computer security :
-    Introductory project to AI and Machine Learning. 
+Introductory project to AI and Machine Learning :
     This project aims at creating a program that predicts the price of a car by using a linear function train with a gradient descent algorithm.
 
 Usage :
